@@ -1,1 +1,15 @@
 ### Aggression-associated gene transcription levels of African honey bee compared to European honey bee
+1. European honey bee
+```bash
+SRR10030210
+```
+```bash
+SRR12918257
+```
+2. Africa honey bee
+```bash
+SRR31156059
+```
+```bash
+SRR989674
+```
