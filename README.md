@@ -1,6 +1,6 @@
-### Aggression-associated gene transcription levels of African honey bee compared to European honey bee
-## detailed workflow
-## download files
+## Aggression-associated gene transcription levels of African honey bee compared to European honey bee
+### detailed workflow
+### download files
 1. request resources
 ```bash
 interact -t 4:00:00 --ntasks-per-node=48
