@@ -84,7 +84,7 @@ STAR --runMode genomeGenerate
 --sjdbGTFfile annotation.gtf
 --sjdbOverhang 100
 ```
-3. After this step, the project folder should contain reference.fasta, annotation.gtf, and star_index/. The outline lists 16 CPUs and 50 GB RAM for indexing, while this command uses 48 threads. Confirm the actual allocation before running it and set --runThreadN to a value within the CPUs available. The alignment commands below also need an allocation that supports their 32 threads.
+4. After this step, the project folder should contain reference.fasta, annotation.gtf, and star_index/. The outline lists 16 CPUs and 50 GB RAM for indexing, while this command uses 48 threads. Confirm the actual allocation before running it and set --runThreadN to a value within the CPUs available. The alignment commands below also need an allocation that supports their 32 threads.
 ### Align reads using STAR
 ## STAR maps each RNA-seq run to the same indexed reference genome. Each command gives its outputs a run-specific prefix and requests a BAM file sorted by genomic position. This BAM records where the reads aligned and will be used for gene counting. Check the FASTQ inputs before running STAR. The commands below pass only the _1.fastq file for each run. If a run is paired-end, pass both its _1.fastq and _2.fastq files after --readFilesIn so STAR can align the mates together. If a run is single-end, use the actual filename produced by fasterq-dump.
 1. European honey bee
