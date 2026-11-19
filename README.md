@@ -86,14 +86,14 @@ STAR --runMode genomeGenerate
 ```
 4. After this step, the project folder should contain reference.fasta, annotation.gtf, and star_index/. The outline lists 16 CPUs and 50 GB RAM for indexing, while this command uses 48 threads. Confirm the actual allocation before running it and set --runThreadN to a value within the CPUs available. The alignment commands below also need an allocation that supports their 32 threads.
 ### Align reads using STAR
-## STAR maps each RNA-seq run to the same indexed reference genome. Each command gives its outputs a run-specific prefix and requests a BAM file sorted by genomic position. This BAM records where the reads aligned and will be used for gene counting. Check the FASTQ inputs before running STAR. The commands below pass only the _1.fastq file for each run. If a run is paired-end, pass both its _1.fastq and _2.fastq files after --readFilesIn so STAR can align the mates together. If a run is single-end, use the actual filename produced by fasterq-dump.
+Description: STAR maps each RNA-seq run to the same indexed reference genome. Each command gives its outputs a run-specific prefix and requests a BAM file sorted by genomic position. This BAM records where the reads aligned and will be used for gene counting. Check the FASTQ inputs before running STAR. The commands below pass only the _1.fastq file for each run. If a run is paired-end, pass both its _1.fastq and _2.fastq files after --readFilesIn so STAR can align the mates together. If a run is single-end, use the actual filename produced by fasterq-dump.
 1. European honey bee
-- Create a folder for the European honey bee alignments. Run this from bee_transcriptome. From inside eurobee, ../ points back to the project folder where the index and FASTQ files are stored.
+- Create a folder for the European honey bee alignments. Run this from bee_transcriptome.
 ```bash
 mkdir eurobee
 cd eurobee
 ```
-- Align the first European run. Map SRR10030210 to the reference and use eurobee_rep1_ to identify its output files.
+- Align the first European run.
 ```bash
 STAR --genomeDir ../star_index \
      --readFilesIn ../sra-data/SRR10030210_1.fastq \
@@ -101,7 +101,7 @@ STAR --genomeDir ../star_index \
      --runThreadN 32 \
      --outSAMtype BAM SortedByCoordinate
 ```
-- Align the second European run. Use the same index and settings for SRR12918257. Give this run its own prefix, eurobee_rep2_, so the results can be matched to the right sample.
+- Align the second European run.
 ```bash
 STAR --genomeDir ../star_index \
      --readFilesIn ../sra-data/SRR12918257_1.fastq \
@@ -127,7 +127,7 @@ STAR --genomeDir ../star_index \
      --runThreadN 32 \
      --outSAMtype BAM SortedByCoordinate
 ```
-d. Align the second African run.
+- Align the second African run.
 ```bash
 STAR --genomeDir ../star_index \
      --readFilesIn ../sra-data/SRR989674_1.fastq \
@@ -136,15 +136,39 @@ STAR --genomeDir ../star_index \
      --outSAMtype BAM SortedByCoordinate
 ```
 3. Check the alignment outputs. Each run should produce a sorted BAM ending in Aligned.sortedByCoord.out.bam and an alignment summary ending in Log.final.out. The summary reports how many reads STAR processed and what fraction mapped to the reference. The sorted BAM is the input for the next stage.
-### Quantify gene expression 
-1. Set up the software for gene counting and quality checks. This block creates the bioinfo-env Conda environment and installs the analysis tools. FastQC summarizes read quality, STAR performs alignment, and SAMtools helps inspect and manage BAM files. Subread provides featureCounts, which uses the GTF to assign aligned reads to genes.
+4. Make sure star_index is there and not empty.
 ```bash
-module load anaconda3/2024.10-1
-conda create --name bioinfo-env python=3.9 -y
-conda activate bioinfo-env 
-conda install -c bioconda star subread fastqc samtools -y
-conda deactivate
+ls -lh star_index
 ```
-### 
+### Quantify gene expression 
+1. Install subread
+```bash
+module load anaconda3
+conda create -n bioinfo -c bioconda subread
+conda activate bioinfo
+```
+2. Go back into correct directory
+```bash
+cd ..
+```
+4. Run featureCounts (?)
+```bash
+featureCounts -T 8 -a annotation.gtf -o counts.txt \
+eurobee/eurobee_rep1_Aligned.sortedByCoord.out.bam \
+eurobee/eurobee_rep2_Aligned.sortedByCoord.out.bam \
+afribee/afribee_rep1_Aligned.sortedByCoord.out.bam \
+afribee/afribee_rep2_Aligned.sortedByCoord.out.bam \
+```
+5. Check the gene counts for the samples.
+```bash
+cat counts.txt.summary
+```
+### Analyze and data visualization in R studio
+
+
+
+
+
+
 
 We use featureCounts to assign reads from the four sorted BAM files to genes using annotation.gtf. The output gives us a table of raw counts for each gene in each sample. These counts can then be normalized to account for differences in sequencing depth before we compare the selected aggression-associated genes between the two groups.
