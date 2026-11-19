@@ -140,7 +140,7 @@ STAR --genomeDir ../star_index \
 
 
 
-6. Set up the software for gene counting and quality checks. This block creates the bioinfo-env Conda environment and installs the analysis tools. FastQC summarizes read quality, STAR performs alignment, and SAMtools helps inspect and manage BAM files. Subread provides featureCounts, which uses the GTF to assign aligned reads to genes.
+1. Set up the software for gene counting and quality checks. This block creates the bioinfo-env Conda environment and installs the analysis tools. FastQC summarizes read quality, STAR performs alignment, and SAMtools helps inspect and manage BAM files. Subread provides featureCounts, which uses the GTF to assign aligned reads to genes.
 ```bash
 module load anaconda3/2024.10-1
 conda create --name bioinfo-env python=3.9 -y
@@ -148,4 +148,4 @@ conda activate bioinfo-env
 conda install -c bioconda star subread fastqc samtools -y
 conda deactivate
 ```
-## We use featureCounts to assign reads from the four sorted BAM files to genes using annotation.gtf. The output gives us a table of raw counts for each gene in each sample. These counts can then be normalized to account for differences in sequencing depth before we compare the selected aggression-associated genes between the two groups.
+### We use featureCounts to assign reads from the four sorted BAM files to genes using annotation.gtf. The output gives us a table of raw counts for each gene in each sample. These counts can then be normalized to account for differences in sequencing depth before we compare the selected aggression-associated genes between the two groups.
