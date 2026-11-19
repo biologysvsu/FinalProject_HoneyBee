@@ -66,13 +66,16 @@ gunzip
 mv annotation.gtf
 ```
 ### star prep: make star genome index (3hr 16cpus RAM 50GB)
-1. load star, request resources, create directory
+1. only if interact has stopped, re-request memory resources
 ```bash
-module load STAR???
-interact -t 4:00:00 --ntasks-per-node=48???
+interact -t 4:00:00 --ntasks-per-node=48
+```
+2. load star and create directory
+```bash
+module load STAR
 mkdir -p star_index
 ```
-2. generate star_index
+3. generate star_index
 ```bash
 STAR --runMode genomeGenerate
 --runThreadN 48
@@ -82,18 +85,57 @@ STAR --runMode genomeGenerate
 --sjdbOverhang 100
 ```
 3. should have: star_index, reference.fasta, annotation.gtf
-### align reads to star
+### align reads using star
 1. European honey bee
-
-
-
-
-
-
-
-
-
-
+a. make directory for European honey bee
+```bash
+mkdir eurobee
+cd eurobee
+```
+b. align reads for 1st rep
+```bash
+STAR --genomeDir ../star_index \
+     --readFilesIn ../sra-data/SRR10030210_1.fastq \
+     --outFileNamePrefix eurobee_rep1_ \
+     --runThreadN 32 \
+     --outSAMtype BAM SortedByCoordinate
+```
+c. align reads for 2nd rep
+```bash
+STAR --genomeDir ../star_index \
+     --readFilesIn ../sra-data/SRR12918257_1.fastq \
+     --outFileNamePrefix eurobee_rep2_ \
+     --runThreadN 32 \
+     --outSAMtype BAM SortedByCoordinate
+```
+2. African honey bee
+a. exit the eurobee directory
+```bash
+cd ..
+```
+b. make directory for African honey bee
+```bash
+mkdir afribee
+cd afribee
+```
+c. align reads for 1st rep
+```bash
+STAR --genomeDir ../star_index \
+     --readFilesIn ../sra-data/SRR31156059_1.fastq \
+     --outFileNamePrefix afribee_rep1_ \
+     --runThreadN 32 \
+     --outSAMtype BAM SortedByCoordinate
+```
+d. align reads for 2nd rep
+```bash
+STAR --genomeDir ../star_index \
+     --readFilesIn ../sra-data/SRR989674_1.fastq \
+     --outFileNamePrefix afribee_rep2_ \
+     --runThreadN 32 \
+     --outSAMtype BAM SortedByCoordinate
+```
+3. should have: sorted BAM file and alignment log file
+### quantify gene expression 
 
 
 
