@@ -1,5 +1,5 @@
 ## Aggression-associated gene expression in African and European honey bees
-Intro: We are using publicly available RNA sequencing data to compare the expression of selected aggression-associated genes in African and European honey bee samples. We first download the sequencing reads, then use STAR to map them to a common honey bee reference genome. [[[ Gene expression quantification . Last, we use R to visualize the data in a bar graph. 
+Intro: We are using publicly available RNA sequencing data to compare the expression of selected aggression-associated genes in African and European honey bee samples. We first download the sequencing reads, then use STAR to map them to a common honey bee reference genome. Then subread will perform gene expression quantification. Last, we use R to visualize the data in a bar graph. 
 ### Download the RNA-seq files
 1. Request computing resources.
 ```bash
@@ -66,11 +66,11 @@ gunzip
 mv annotation.gtf
 ```
 ### Build the STAR genome index (3hr 16cpus RAM 50GB)
-1. Request another interactive session if the first one ended. Indexing uses cluster resources. If your first session is still active, continue in that session. If you start a new one, return to the bee_transcriptome project folder before running STAR.
+1. Request another interactive session if the first one ended.
 ```bash
 interact -t 4:00:00 --ntasks-per-node=48
 ```
-2. Load STAR and create the index folder. The star_index directory will hold the index files that STAR uses for all four alignments.
+2. Load STAR and create the index folder.
 ```bash
 module load STAR
 mkdir -p star_index
@@ -84,11 +84,11 @@ STAR --runMode genomeGenerate
 --sjdbGTFfile annotation.gtf
 --sjdbOverhang 100
 ```
-4. After this step, the project folder should contain reference.fasta, annotation.gtf, and star_index/. The outline lists 16 CPUs and 50 GB RAM for indexing, while this command uses 48 threads. Confirm the actual allocation before running it and set --runThreadN to a value within the CPUs available. The alignment commands below also need an allocation that supports their 32 threads.
+4. After this step, the project folder should contain reference.fasta, annotation.gtf, and star_index/. The outline lists 16 CPUs and 50 GB RAM for indexing, while this command uses 48 threads. Confirm the actual allocation before running it and set --runThreadN to a value within the CPUs available.
 ### Align reads using STAR
 STAR maps each RNA-seq run to the same indexed reference genome. Each command gives its outputs a run-specific prefix and requests a BAM file sorted by genomic position. This BAM records where the reads aligned and will be used for gene counting. Check the FASTQ inputs before running STAR. The commands below pass only the _1.fastq file for each run. If a run is paired-end, pass both its _1.fastq and _2.fastq files after --readFilesIn so STAR can align the mates together. If a run is single-end, use the actual filename produced by fasterq-dump.
 1. European honey bee
-- Create a folder for the European honey bee alignments. Run this from bee_transcriptome. From inside eurobee, ../ points back to the project folder where the index and FASTQ files are stored.
+- Create a folder for the European honey bee alignments. Run this from bee_transcriptome.
 ```bash
 mkdir eurobee
 cd eurobee
