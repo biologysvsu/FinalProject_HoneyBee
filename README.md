@@ -1,17 +1,17 @@
 ## Aggression-associated gene expression in African and European honey bees
-### We are using publicly available RNA sequencing (RNA-seq) data to compare the expression of selected aggression-associated genes in African and European honey bee samples. We first download the sequencing reads, then use STAR to map them to a common honey bee reference genome. The resulting alignments will let us count the reads assigned to each gene. Those counts are the starting point for comparing RNA abundance between the two groups.
+Intro: We are using publicly available RNA sequencing data to compare the expression of selected aggression-associated genes in African and European honey bee samples. We first download the sequencing reads, then use STAR to map them to a common honey bee reference genome. [[[ Gene expression quantification . Last, we use R to visualize the data in a bar graph. 
 ### Download the RNA-seq files
-1. Request computing resources. This starts an interactive session on the cluster so we have computing resources to process the sequencing files.
+1. Request computing resources.
 ```bash
 interact -t 4:00:00 --ntasks-per-node=48
 ```
-2. Go to the shared folder. Then create a new folder and go into it. The bee_transcriptome folder gives everyone in the group a common place to access the sequencing files and analysis outputs.
+2. Go to the shared folder. Then create a new folder and go into it. 
 ```bash
 cd /ocean/projects/bio260081p/shared
 mkdir -p bee_transcriptome
 cd bee_transcriptome
 ```
-3. Make a list of the sequencing runs. Each SRR accession identifies one sequencing run in NCBI’s Sequence Read Archive (SRA). We save one accession per line so the download script can process the runs one at a time.
+3. Make a list of the sequencing runs. Each SRR accession identifies one sequencing run in NCBI’s Sequence Read Archive (SRA).
 ```bash
 vi srr_accessions.txt
 ```
@@ -88,12 +88,12 @@ STAR --runMode genomeGenerate
 ### Align reads using STAR
 ## STAR maps each RNA-seq run to the same indexed reference genome. Each command gives its outputs a run-specific prefix and requests a BAM file sorted by genomic position. This BAM records where the reads aligned and will be used for gene counting. Check the FASTQ inputs before running STAR. The commands below pass only the _1.fastq file for each run. If a run is paired-end, pass both its _1.fastq and _2.fastq files after --readFilesIn so STAR can align the mates together. If a run is single-end, use the actual filename produced by fasterq-dump.
 1. European honey bee
-a. Create a folder for the European honey bee alignments. Run this from bee_transcriptome. From inside eurobee, ../ points back to the project folder where the index and FASTQ files are stored.
+- Create a folder for the European honey bee alignments. Run this from bee_transcriptome. From inside eurobee, ../ points back to the project folder where the index and FASTQ files are stored.
 ```bash
 mkdir eurobee
 cd eurobee
 ```
-b. Align the first European run. Map SRR10030210 to the reference and use eurobee_rep1_ to identify its output files.
+- Align the first European run. Map SRR10030210 to the reference and use eurobee_rep1_ to identify its output files.
 ```bash
 STAR --genomeDir ../star_index \
      --readFilesIn ../sra-data/SRR10030210_1.fastq \
@@ -101,7 +101,7 @@ STAR --genomeDir ../star_index \
      --runThreadN 32 \
      --outSAMtype BAM SortedByCoordinate
 ```
-c. Align the second European run. Use the same index and settings for SRR12918257. Give this run its own prefix, eurobee_rep2_, so the results can be matched to the right sample.
+- Align the second European run. Use the same index and settings for SRR12918257. Give this run its own prefix, eurobee_rep2_, so the results can be matched to the right sample.
 ```bash
 STAR --genomeDir ../star_index \
      --readFilesIn ../sra-data/SRR12918257_1.fastq \
@@ -110,16 +110,16 @@ STAR --genomeDir ../star_index \
      --outSAMtype BAM SortedByCoordinate
 ```
 2. African honey bee
-a. Return to the project folder
+- Return to the project folder
 ```bash
 cd ..
 ```
-b. Create a folder for the African honey bee alignments. This puts afribee alongside eurobee, so both groups can access the same index and FASTQ.
+- Create a folder for the African honey bee alignments.
 ```bash
 mkdir afribee
 cd afribee
 ```
-c. Align the first African run. Map SRR31156059 to the same reference used for the European runs and label its outputs with afribee_rep1_ 
+- Align the first African run.
 ```bash
 STAR --genomeDir ../star_index \
      --readFilesIn ../sra-data/SRR31156059_1.fastq \
@@ -127,7 +127,7 @@ STAR --genomeDir ../star_index \
      --runThreadN 32 \
      --outSAMtype BAM SortedByCoordinate
 ```
-d. Align the second African run. Map SRR989674 using the same settings and label its outputs with afribee_rep2_ 
+d. Align the second African run.
 ```bash
 STAR --genomeDir ../star_index \
      --readFilesIn ../sra-data/SRR989674_1.fastq \
@@ -137,9 +137,6 @@ STAR --genomeDir ../star_index \
 ```
 3. Check the alignment outputs. Each run should produce a sorted BAM ending in Aligned.sortedByCoord.out.bam and an alignment summary ending in Log.final.out. The summary reports how many reads STAR processed and what fraction mapped to the reference. The sorted BAM is the input for the next stage.
 ### Quantify gene expression 
-
-
-
 1. Set up the software for gene counting and quality checks. This block creates the bioinfo-env Conda environment and installs the analysis tools. FastQC summarizes read quality, STAR performs alignment, and SAMtools helps inspect and manage BAM files. Subread provides featureCounts, which uses the GTF to assign aligned reads to genes.
 ```bash
 module load anaconda3/2024.10-1
@@ -148,4 +145,6 @@ conda activate bioinfo-env
 conda install -c bioconda star subread fastqc samtools -y
 conda deactivate
 ```
-### We use featureCounts to assign reads from the four sorted BAM files to genes using annotation.gtf. The output gives us a table of raw counts for each gene in each sample. These counts can then be normalized to account for differences in sequencing depth before we compare the selected aggression-associated genes between the two groups.
+### 
+
+We use featureCounts to assign reads from the four sorted BAM files to genes using annotation.gtf. The output gives us a table of raw counts for each gene in each sample. These counts can then be normalized to account for differences in sequencing depth before we compare the selected aggression-associated genes between the two groups.
