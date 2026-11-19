@@ -172,7 +172,101 @@ afribee/afribee_rep2_Aligned.sortedByCoord.out.bam \
 ```bash
 cat counts.txt.summary
 ```
-### Analyze and data visualization in R studio
+Note: we use featureCounts to assign reads from the four sorted BAM files to genes using annotation.gtf. The output gives us a table of raw counts for each gene in each sample. These counts can then be normalized to account for differences in sequencing depth before we compare the selected aggression-associated genes between the two groups.
+### Analyzation and data visualization in R studio
+1. Activate the R environment
+```bash
+conda activate rnaseq
+```
+2. Open R
+```bash
+R
+```
+Note: prompt should change from the [bridges2@-logintutorial4]$ to >
+3. From here, there are a few different R scripts to try. 
+```bash
+### ORIGINAL STUDENT-LED TUTORIAL 3 ###
 
+library(DESeq2)
+library(ggplot2)
+library(ggrepel)
 
-We use featureCounts to assign reads from the four sorted BAM files to genes using annotation.gtf. The output gives us a table of raw counts for each gene in each sample. These counts can then be normalized to account for differences in sequencing depth before we compare the selected aggression-associated genes between the two groups.
+# 1. Load featureCounts data
+counts <- read.table("counts.txt", header=TRUE,
+                     row.names=1, sep="\t")
+counts <- as.matrix(counts[, -(1:5)])
+
+# 2. Define experimental groups
+stopifnot(ncol(counts) == 8)
+
+coldata <- data.frame(
+  condition = factor(c(rep("mock", 4), rep("covid", 4)),
+                     levels=c("mock", "covid")),
+  row.names = colnames(counts)
+)
+
+# 3. Run DESeq2 analysis
+dds <- DESeqDataSetFromMatrix(
+  countData=counts,
+  colData=coldata,
+  design=~condition
+)
+
+dds <- DESeq(dds)
+res <- results(dds, contrast=c("condition", "covid", "mock"))
+
+# 4. Save results
+write.csv(as.data.frame(res), "DESeq2_results.csv")
+
+# 5. Identify differentially expressed genes
+res <- as.data.frame(res)
+res$Gene <- rownames(res)
+res <- res[!is.na(res$padj) & !is.na(res$log2FoldChange), ]
+
+res$significance <- "Not Significant"
+res$significance[res$padj < 0.05 & res$log2FoldChange > 1] <- "Upregulated"
+res$significance[res$padj < 0.05 & res$log2FoldChange < -1] <- "Downregulated"
+
+# Count genes in each category
+print(table(res$significance))
+
+# 6. Select top 5 upregulated genes
+up_genes <- subset(res, significance == "Upregulated")
+up_genes <- head(up_genes[order(up_genes$padj), ], 5)
+
+# 7. Select top 5 downregulated genes
+down_genes <- subset(res, significance == "Downregulated")
+down_genes <- head(down_genes[order(down_genes$padj), ], 5)
+
+# Print selected genes
+print(up_genes)
+print(down_genes)
+
+# Combine genes for labeling
+label_genes <- rbind(up_genes, down_genes)
+
+# 8. Create volcano plot with gene labels
+p <- ggplot(res, aes(x=log2FoldChange, y=-log10(padj),
+                     color=significance)) +
+  geom_point(alpha=0.6, size=1) +
+  geom_text_repel(data=label_genes,
+                  aes(label=Gene),
+                  size=3, max.overlaps=Inf) +
+  scale_color_manual(values=c(
+    "Not Significant"="gray",
+    "Upregulated"="red",
+    "Downregulated"="blue")) +
+  theme_minimal() +
+  labs(title="Differential Gene Expression",
+       x="Log2 Fold Change (COVID vs Mock)",
+       y="-Log10 Adjusted P-value") +
+  theme(legend.position="top")
+
+# 9. Save volcano plot
+ggsave("volcano_plot.png", plot=p,
+       width=8, height=6, dpi=300)
+
+# 10. Save selected genes
+write.csv(label_genes, "top_genes.csv",
+          row.names=FALSE)
+```
