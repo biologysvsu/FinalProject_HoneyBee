@@ -127,7 +127,7 @@ STAR --genomeDir ../star_index \
      --runThreadN 32 \
      --outSAMtype BAM SortedByCoordinate
 ```
-d. Align the second African run.
+- Align the second African run.
 ```bash
 STAR --genomeDir ../star_index \
      --readFilesIn ../sra-data/SRR989674_1.fastq \
