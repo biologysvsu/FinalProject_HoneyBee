@@ -93,7 +93,7 @@ STAR maps each RNA-seq run to the same indexed reference genome. Each command gi
 mkdir eurobee
 cd eurobee
 ```
-- Align the first European run. Map SRR10030210 to the reference and use eurobee_rep1_ to identify its output files.
+- Align the first European run. 
 ```bash
 STAR --genomeDir ../star_index \
      --readFilesIn ../sra-data/SRR10030210_1.fastq \
@@ -101,7 +101,7 @@ STAR --genomeDir ../star_index \
      --runThreadN 32 \
      --outSAMtype BAM SortedByCoordinate
 ```
-- Align the second European run. Use the same index and settings for SRR12918257. Give this run its own prefix, eurobee_rep2_, so the results can be matched to the right sample.
+- Align the second European run.
 ```bash
 STAR --genomeDir ../star_index \
      --readFilesIn ../sra-data/SRR12918257_1.fastq \
@@ -145,6 +145,34 @@ conda activate bioinfo-env
 conda install -c bioconda star subread fastqc samtools -y
 conda deactivate
 ```
-### 
+4. Make sure star_index is there and not empty.
+```bash
+ls -lh star_index
+```
+### Quantify gene expression 
+1. Install subread
+```bash
+module load anaconda3
+conda create -n bioinfo -c bioconda subread
+conda activate bioinfo
+```
+2. Go back into correct directory
+```bash
+cd ..
+```
+4. Run featureCounts (?)
+```bash
+featureCounts -T 8 -a annotation.gtf -o counts.txt \
+eurobee/eurobee_rep1_Aligned.sortedByCoord.out.bam \
+eurobee/eurobee_rep2_Aligned.sortedByCoord.out.bam \
+afribee/afribee_rep1_Aligned.sortedByCoord.out.bam \
+afribee/afribee_rep2_Aligned.sortedByCoord.out.bam \
+```
+5. Check the gene counts for the samples.
+```bash
+cat counts.txt.summary
+```
+### Analyze and data visualization in R studio
+
 
 We use featureCounts to assign reads from the four sorted BAM files to genes using annotation.gtf. The output gives us a table of raw counts for each gene in each sample. These counts can then be normalized to account for differences in sequencing depth before we compare the selected aggression-associated genes between the two groups.
