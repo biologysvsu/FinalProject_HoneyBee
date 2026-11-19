@@ -200,8 +200,8 @@ counts <- as.matrix(counts[, -(1:5)])
 stopifnot(ncol(counts) == 8)
 
 coldata <- data.frame(
-  condition = factor(c(rep("mock", 4), rep("covid", 4)),
-                     levels=c("mock", "covid")),
+  condition = factor(c(rep("eurobee", 2), rep("afribee", 2)),
+                     levels=c("eurobee", "afribee")),
   row.names = colnames(counts)
 )
 
@@ -213,7 +213,7 @@ dds <- DESeqDataSetFromMatrix(
 )
 
 dds <- DESeq(dds)
-res <- results(dds, contrast=c("condition", "covid", "mock"))
+res <- results(dds, contrast=c("condition", "afribee", "eurobee"))
 
 # 4. Save results
 write.csv(as.data.frame(res), "DESeq2_results.csv")
@@ -258,7 +258,7 @@ p <- ggplot(res, aes(x=log2FoldChange, y=-log10(padj),
     "Downregulated"="blue")) +
   theme_minimal() +
   labs(title="Differential Gene Expression",
-       x="Log2 Fold Change (COVID vs Mock)",
+       x="Log2 Fold Change (Afribee vs Eurobee)",
        y="-Log10 Adjusted P-value") +
   theme(legend.position="top")
 
